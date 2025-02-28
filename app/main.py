@@ -2,11 +2,9 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.v1.endpoints import users
 from app.db.session import get_db
 
-app = FastAPI()
+app = FastAPI(title="Social Media API")
 
-@app.get("/test-db")
-async def test_db(db:AsyncSession=Depends(get_db)):
-    result = await db.execute(text("SELECT 1"))
-    return {"status": "success", "result": result.scalar()}
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
