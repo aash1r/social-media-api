@@ -1,9 +1,7 @@
-from fastapi import Depends, FastAPI
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import FastAPI
 
 from app.api.v1.endpoints import auth, users
-from app.db.session import get_db
+
 
 app = FastAPI(title="Social Media API")
 
