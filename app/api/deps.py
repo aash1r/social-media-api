@@ -3,19 +3,14 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
-import logging
+
 
 from app.core.config import settings
 from app.crud.user import user as user_crud
 from app.db.session import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-
-
-import logging
-
-logging.basicConfig(level=logging.INFO)
 
 
 async def get_current_user(
@@ -44,3 +39,24 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403,
+            detail="Not enough permissions",
+        )
+    return current_user
+
+
+def check_permissions(*allowed_roles: UserRole):
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail="Not in enough permissions",
+            )
+        return current_user
+
+    return role_checker

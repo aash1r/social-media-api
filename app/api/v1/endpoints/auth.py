@@ -24,5 +24,6 @@ async def login(
         )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user!")
+    user_role = await user_crud.get_by_email(db=db, email=user.email)
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "role": user_role.role}
